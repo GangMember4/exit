@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <title>EXIT</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" as="image" href="/hero.jpg" />
+  </head>
+  <body>
+    <div class="stage">
+      <div class="scene" aria-hidden="true">
+        <img src="/hero.jpg" alt="" />
+        <div class="scene-shade"></div>
+        <div class="door-glow"></div>
+      </div>
+
+      <header class="nav">
+        <div class="logo">
+          <svg class="logo-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <clipPath id="mark-clip">
+                <rect width="64" height="64" rx="12" />
+              </clipPath>
+            </defs>
+            <g clip-path="url(#mark-clip)">
+              <rect width="64" height="64" fill="#FFDC00" />
+              <path fill="#111" fill-rule="evenodd" d="M10 51V14h20v37H10zm4.2-4.2h11.6V18.2H14.2v28.6z" />
+              <g fill="#111" transform="translate(20 10) scale(1.62)">
+                <path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9 7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" />
+              </g>
+            </g>
+          </svg>
+          <span class="logo-word">EXIT</span>
+        </div>
+        <span class="nav-label">HOW IT WORKS</span>
+        <div class="nav-action">
+          <button id="connect" class="btn" type="button">
+            <span id="connect-label" class="btn-label">CONNECT WALLET</span>
+            <svg class="chev" id="connect-chev" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M6 3.2 10.7 8 6 12.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <p id="wallet-note" class="wallet-note" hidden></p>
+        </div>
+      </header>
+
+      <div class="hero">
+        <section class="copy">
+          <p class="tag">EVERYONE’S EARLY. UNTIL THEY’RE NOT.</p>
+          <h1>THE LAST<br />ONE OUT <span class="win">WINS.</span></h1>
+          <button id="play" class="btn btn-play" type="button">
+            PLAY NOW
+            <svg class="chev" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M6 3.2 10.7 8 6 12.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </section>
+
+        <aside class="terminal">
+          <div class="term-top">
+            <div class="mult">
+              <span class="kicker">YOUR MULTIPLIER</span>
+              <strong>3.24x</strong>
+            </div>
+            <div class="term-meta">
+              <span class="round"><i class="pulse" aria-hidden="true"></i>ROUND 042</span>
+              <span class="timer">00:32</span>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <svg id="chart" viewBox="0 0 600 230" role="img" aria-label="Preview chart of a multiplier rising, then crashing">
+              <defs>
+                <linearGradient id="crash-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ff2a2a" stop-opacity="0.32" />
+                  <stop offset="100%" stop-color="#ff2a2a" stop-opacity="0" />
+                </linearGradient>
+                <filter id="redglow" x="-15%" y="-40%" width="130%" height="180%">
+                  <feGaussianBlur stdDeviation="3.2" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <g class="grid" stroke="rgba(255,255,255,0.075)" stroke-width="1">
+                <path d="M0 46 H600 M0 92 H600 M0 138 H600 M0 184 H600" />
+                <path d="M75 8 V222 M150 8 V222 M225 8 V222 M300 8 V222 M375 8 V222 M450 8 V222 M525 8 V222" />
+              </g>
+              <path id="chart-area" fill="url(#crash-fill)" />
+              <path id="chart-line" fill="none" stroke="#ff2d2d" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" filter="url(#redglow)" />
+              <circle id="chart-halo" r="11" fill="rgba(255,220,0,0.22)" />
+              <circle id="chart-dot" r="5.5" fill="#FFDC00" />
+            </svg>
+          </div>
+          <div class="exit-visual">EXIT</div>
+        </aside>
+      </div>
+
+      <section class="steps" aria-label="How a round plays">
+        <article class="step">
+          <svg viewBox="0 0 40 40" aria-hidden="true">
+            <path fill="#FFDC00" d="M4 32h6.5V18H4V32zm9.2 0h6.5V12h-6.5V32zm9.3 0H35V6h-6.5V32z" />
+            <path fill="none" stroke="#FFDC00" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M6 21.5 14.2 14l4.2 3.3L31 6.5" />
+            <path fill="none" stroke="#FFDC00" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M24.5 6.5H31V13" />
+          </svg>
+          <div>
+            <h2>PLAY</h2>
+            <p>Join a round and watch the multiplier grow.</p>
+          </div>
+        </article>
+        <article class="step">
+          <svg viewBox="0 0 40 40" aria-hidden="true">
+            <path fill="#FFDC00" d="M5 33V11.5h3.4V8.4H20v3.1h-8.2V29.4H20V33H5z" />
+            <g fill="#FFDC00" transform="translate(13.2 6.2) scale(1.02)">
+              <path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9 7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7" />
+            </g>
+          </svg>
+          <div>
+            <h2>SURVIVE</h2>
+            <p>Hit EXIT before it’s too late.</p>
+          </div>
+        </article>
+        <article class="step">
+          <svg viewBox="0 0 40 40" aria-hidden="true">
+            <path fill="#FFDC00" fill-rule="evenodd" d="M13 6h14v2.3c0 4.7-3 8-6.7 8.8V22h4.5v2.3H15.2V22h4.4v-4.9C16 16.3 13 13 13 8.3V6zM9.8 8.4H7v2.2c0 2.5 1.7 4.3 3.8 4.9-.5-1.1-.8-2.3-.8-3.6V8.4zm20.4 0v3.5c0 1.3-.3 2.5-.8 3.6 2.1-.6 3.8-2.4 3.8-4.9V8.4h-3zM15.4 26.2h9.2v2.2h-9.2v-2.2zM13.8 29.8h12.4V32.6H13.8V29.8zM20 10.3l1.05 2.15 2.35.32-1.72 1.62.43 2.3L20 15.55l-2.11 1.14.43-2.3-1.72-1.62 2.35-.32z" />
+          </svg>
+          <div>
+            <h2>WIN</h2>
+            <p>Take home your multiplier.</p>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <div class="modal" id="modal" hidden>
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <button class="modal-close" type="button" data-close aria-label="Close">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M3.5 3.5 12.5 12.5 M12.5 3.5 3.5 12.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+        </button>
+        <h2 id="modal-title">ENTER BETA ACCESS KEY</h2>
+        <form id="gate">
+          <input id="access-key" name="access-key" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Enter your access key" />
+          <p class="gate-error" id="gate-error" role="alert" hidden>INVALID ACCESS KEY</p>
+          <button class="btn btn-block" type="submit">UNLOCK ACCESS</button>
+        </form>
+        <p class="gate-note">Access is currently invite-only.</p>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
