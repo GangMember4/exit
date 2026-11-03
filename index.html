@@ -15,10 +15,7 @@
           <img src="/hero.jpg" alt="" />
           <div class="hotspots" id="hotspots">
             <div class="door-glow"></div>
-            <div class="lens lens-l" id="lens-l"></div>
-            <div class="lens lens-r" id="lens-r"></div>
             <div class="smoke" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-            <div class="ember"></div>
           </div>
         </div>
         <div class="scene-shade"></div>
@@ -43,7 +40,12 @@
           </svg>
           <span class="logo-word">EXIT</span>
         </div>
-        <span class="nav-label">HOW IT WORKS</span>
+        <!-- PLACEHOLDER: replace href="#" with the EXIT profile URL on X. -->
+        <a class="nav-x" href="#" aria-label="EXIT on X">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.727-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+          </svg>
+        </a>
         <div class="nav-action">
           <button id="connect" class="btn" type="button">
             <span id="connect-label" class="btn-label">CONNECT WALLET</span>
@@ -58,7 +60,10 @@
       <div class="hero">
         <section class="copy">
           <p class="tag">EVERYONE’S EARLY. UNTIL THEY’RE NOT.</p>
-          <h1>THE LAST<br />ONE OUT <span class="win">WINS.</span></h1>
+          <h1>
+            <span class="line"><span class="word" style="--i:0">THE</span><span class="word" style="--i:1">LAST</span></span>
+            <span class="line"><span class="word" style="--i:2">ONE</span><span class="word" style="--i:3">OUT</span><span class="word win" style="--i:4">WINS.</span></span>
+          </h1>
           <button id="play" class="btn btn-play" type="button">
             PLAY NOW
             <svg class="chev" viewBox="0 0 16 16" aria-hidden="true">

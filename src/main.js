@@ -186,23 +186,6 @@ function startChart() {
 }
 startChart();
 
-function buildLenses() {
-  document.querySelectorAll(".lens").forEach((lens) => {
-    const track = document.createElement("div");
-    track.className = "lens-track";
-    const count = 36;
-    for (let i = 0; i < count; i += 1) {
-      const bar = document.createElement("i");
-      const h = 22 + ((i * 47) % 68);
-      bar.style.height = `${h}%`;
-      bar.style.animationDelay = `${(i % 7) * 0.05}s`;
-      track.appendChild(bar);
-    }
-    lens.appendChild(track);
-  });
-}
-buildLenses();
-
 function parsePos(value) {
   if (!value) return 0.5;
   if (value.endsWith("%")) return parseFloat(value) / 100;
