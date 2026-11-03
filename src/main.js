@@ -6,41 +6,48 @@ import "@fontsource/archivo/800.css";
 import "@fontsource/archivo/800-italic.css";
 import "./style.css";
 
-const BASE = [
-  [12, 156],
-  [40, 150],
-  [64, 158],
-  [92, 142],
-  [118, 148],
-  [146, 130],
-  [174, 136],
-  [204, 116],
-  [232, 122],
-  [260, 104],
-  [288, 110],
-  [318, 90],
-  [346, 98],
-  [374, 74],
-  [402, 82],
-  [428, 58],
-  [452, 66],
-  [474, 40],
-  [496, 28],
-  [514, 50],
-  [530, 86],
-  [544, 68],
-  [560, 118],
-  [574, 162],
-  [588, 196],
-];
-
-const FLOOR = 218;
-const PEAK = 18;
+const ROUND_MS = 11000;
+const WINDOW_MS = 7200;
+const CLIMB_END = 0.74;
+const CRASH_END = 0.9;
+const PMIN = 0.55;
+const PMAX = 5.7;
+const VB_W = 600;
+const FLOOR = 214;
 
 const line = document.querySelector("#chart-line");
 const area = document.querySelector("#chart-area");
+const candles = document.querySelector("#candles");
 const dot = document.querySelector("#chart-dot");
 const halo = document.querySelector("#chart-halo");
+const multiplierEl = document.querySelector("#multiplier");
+const timerEl = document.querySelector("#timer");
+const terminal = document.querySelector("#terminal");
+const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+function priceFromU(u) {
+  const wobble = Math.sin(u * 46) * 0.045 + Math.sin(u * 19) * 0.07;
+  if (u < CLIMB_END) {
+    const t = u / CLIMB_END;
+    return 1.12 + t * t * 4.05 + wobble;
+  }
+  if (u < CRASH_END) {
+    const t = (u - CLIMB_END) / (CRASH_END - CLIMB_END);
+    const peak = 1.12 + 4.05;
+    return peak + (0.78 - peak) * Math.pow(t, 0.45) + wobble * 0.25;
+  }
+  return 1.12;
+}
+
+function priceAt(ms) {
+  const u = ((ms % ROUND_MS) + ROUND_MS) % ROUND_MS / ROUND_MS;
+  return { u, price: priceFromU(u) };
+}
+
+function yOf(price) {
+  const n = Math.min(1, Math.max(0, (price - PMIN) / (PMAX - PMIN)));
+  return 208 - n * 176;
+}
 
 function smooth(pts) {
   let d = `M${pts[0][0].toFixed(2)} ${pts[0][1].toFixed(2)}`;
@@ -58,18 +65,31 @@ function smooth(pts) {
   return d;
 }
 
-function pointsAt(t) {
-  return BASE.map((p, i) => {
-    let amp = 1.15;
-    if (i < PEAK) amp = 3.5;
-    else if (i < PEAK + 3) amp = 1.8;
-    const y = p[1] + Math.sin(t * 0.00135 + i * 0.62) * amp;
-    return [p[0], y];
-  });
+function formatMult(price) {
+  return `${price.toFixed(2)}x`;
 }
 
-function renderChart(t) {
-  const pts = pointsAt(t);
+function formatTime(seconds) {
+  const s = Math.max(0, Math.min(99, seconds));
+  return `00:${String(s).padStart(2, "0")}`;
+}
+
+let lastCandleDraw = -1000;
+
+function renderFeed(nowMs, animate) {
+  const samples = 72;
+  const candlesEvery = 3;
+  const pts = [];
+  const candlePts = [];
+  for (let i = 0; i < samples; i += 1) {
+    const ms = nowMs - WINDOW_MS + (WINDOW_MS * i) / (samples - 1);
+    const { price } = priceAt(ms);
+    const x = 16 + ((VB_W - 32) * i) / (samples - 1);
+    const y = yOf(price);
+    pts.push([x, y]);
+    if (i % candlesEvery === 0) candlePts.push({ x, price, ms });
+  }
+
   const d = smooth(pts);
   const last = pts[pts.length - 1];
   const first = pts[0];
@@ -79,22 +99,143 @@ function renderChart(t) {
   dot.setAttribute("cy", last[1].toFixed(2));
   halo.setAttribute("cx", last[0].toFixed(2));
   halo.setAttribute("cy", last[1].toFixed(2));
+
+  const ns = "http://www.w3.org/2000/svg";
+  const drawCandles = !animate || nowMs - lastCandleDraw > 140;
+  if (drawCandles) {
+    lastCandleDraw = nowMs;
+    candles.replaceChildren();
+  }
+  const slot = (VB_W - 32) / samples;
+  if (drawCandles) for (let i = 1; i < candlePts.length; i += 1) {
+    const prev = priceAt(candlePts[i].ms - 220).price;
+    const close = candlePts[i].price;
+    const open = prev;
+    const wick = Math.abs(close - open) * 0.65 + 0.04;
+    const high = Math.max(open, close) + wick;
+    const low = Math.min(open, close) - wick * 0.55;
+    const up = close >= open;
+    const x = candlePts[i].x;
+    const bodyTop = yOf(Math.max(open, close));
+    const bodyBot = yOf(Math.min(open, close));
+    const bodyH = Math.max(1.6, bodyBot - bodyTop);
+    const wickEl = document.createElementNS(ns, "line");
+    wickEl.setAttribute("x1", x.toFixed(2));
+    wickEl.setAttribute("x2", x.toFixed(2));
+    wickEl.setAttribute("y1", yOf(high).toFixed(2));
+    wickEl.setAttribute("y2", yOf(low).toFixed(2));
+    wickEl.setAttribute("stroke", up ? "rgba(255,220,170,0.7)" : "rgba(255,70,70,0.85)");
+    wickEl.setAttribute("stroke-width", "1");
+    const body = document.createElementNS(ns, "rect");
+    body.setAttribute("x", (x - slot * 0.7).toFixed(2));
+    body.setAttribute("y", bodyTop.toFixed(2));
+    body.setAttribute("width", Math.max(2.2, slot * 1.15).toFixed(2));
+    body.setAttribute("height", bodyH.toFixed(2));
+    body.setAttribute("rx", "0.6");
+    body.setAttribute("fill", up ? "rgba(255,214,120,0.92)" : "#ff2d2d");
+    candles.appendChild(wickEl);
+    candles.appendChild(body);
+  }
+
+  const { u, price } = priceAt(nowMs);
+  const crashing = animate && u >= CLIMB_END && u < CRASH_END + 0.04;
+  terminal.classList.toggle("is-crashing", crashing);
+  line.setAttribute("stroke", crashing ? "#ff1a1a" : "#ff3a3a");
+  line.setAttribute("stroke-width", crashing ? "3.1" : "2.3");
+
+  if (animate) {
+    multiplierEl.textContent = formatMult(price);
+    const remain = 32 - Math.floor(u * 13);
+    timerEl.textContent = formatTime(remain);
+  } else {
+    multiplierEl.textContent = "3.24x";
+    timerEl.textContent = "00:32";
+  }
 }
 
-const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+function renderResting() {
+  const series = [1.35, 1.52, 1.46, 1.74, 1.9, 1.82, 2.15, 2.28, 2.1, 2.46, 2.7, 2.58, 2.95, 3.24, 3.55, 3.4, 3.86, 4.2, 3.9, 2.7, 1.55, 1.05];
+  const pts = series.map((price, i) => {
+    const x = 16 + ((VB_W - 32) * i) / (series.length - 1);
+    return [x, yOf(price)];
+  });
+  const d = smooth(pts);
+  const last = pts[pts.length - 1];
+  const first = pts[0];
+  line.setAttribute("d", d);
+  area.setAttribute("d", `${d} L${last[0].toFixed(2)} ${FLOOR} L${first[0].toFixed(2)} ${FLOOR} Z`);
+  dot.setAttribute("cx", last[0].toFixed(2));
+  dot.setAttribute("cy", last[1].toFixed(2));
+  halo.setAttribute("cx", last[0].toFixed(2));
+  halo.setAttribute("cy", last[1].toFixed(2));
+  multiplierEl.textContent = "3.24x";
+  timerEl.textContent = "00:32";
+  terminal.classList.remove("is-crashing");
+}
+
 function startChart() {
   if (motion.matches) {
-    renderChart(0);
+    renderResting();
     return;
   }
-  const started = performance.now();
   const loop = (now) => {
-    renderChart(now - started);
+    renderFeed(now, true);
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
 }
 startChart();
+
+function buildLenses() {
+  document.querySelectorAll(".lens").forEach((lens) => {
+    const track = document.createElement("div");
+    track.className = "lens-track";
+    const count = 36;
+    for (let i = 0; i < count; i += 1) {
+      const bar = document.createElement("i");
+      const h = 22 + ((i * 47) % 68);
+      bar.style.height = `${h}%`;
+      bar.style.animationDelay = `${(i % 7) * 0.05}s`;
+      track.appendChild(bar);
+    }
+    lens.appendChild(track);
+  });
+}
+buildLenses();
+
+function parsePos(value) {
+  if (!value) return 0.5;
+  if (value.endsWith("%")) return parseFloat(value) / 100;
+  if (value === "left" || value === "top") return 0;
+  if (value === "right" || value === "bottom") return 1;
+  return 0.5;
+}
+
+function layoutHotspots() {
+  const photo = document.querySelector("#scene-photo");
+  const img = photo.querySelector("img");
+  const layer = document.querySelector("#hotspots");
+  const cw = photo.clientWidth;
+  const ch = photo.clientHeight;
+  if (!cw || !ch) return;
+  const pos = getComputedStyle(img).objectPosition.trim().split(/\s+/);
+  const px = parsePos(pos[0]);
+  const py = parsePos(pos[1] || "50%");
+  const scale = Math.max(cw / 1280, ch / 720);
+  const w = 1280 * scale;
+  const h = 720 * scale;
+  layer.style.left = `${(cw - w) * px}px`;
+  layer.style.top = `${(ch - h) * py}px`;
+  layer.style.width = `${w}px`;
+  layer.style.height = `${h}px`;
+}
+
+const photo = document.querySelector("#scene-photo");
+const photoImg = photo.querySelector("img");
+if (photoImg.complete) layoutHotspots();
+photoImg.addEventListener("load", layoutHotspots);
+new ResizeObserver(layoutHotspots).observe(photo);
+window.addEventListener("resize", layoutHotspots);
 
 function detectEthereum() {
   try {
